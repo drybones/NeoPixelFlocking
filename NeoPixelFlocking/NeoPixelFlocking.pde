@@ -1,7 +1,7 @@
 Flock flock;
 PImage texture;
 OPC opc;
-float globalBrightness = 1.0;
+float globalBrightness = 0.5;
 
 void setup() {
   size(640,640);
@@ -12,7 +12,7 @@ void setup() {
   
   opc = new OPC(this, "raspberrypi.local", 7890);
   opc.setColorCorrection(2.5, globalBrightness, globalBrightness, globalBrightness);
-  opc.ledGrid8x8(0, width/2, height/2, height / 25.0, 0, false);
+  opc.ledGrid8x8(0, width/2, height/2, height / 9.0, 0, false);
   
   flock = new Flock();
   // Add an initial set of boids into the system
@@ -67,6 +67,7 @@ class Boid {
   float r;
   float maxforce;    // Maximum steering force
   float maxspeed;    // Maximum speed
+  float hue;
 
     Boid(float x, float y) {
     acceleration = new PVector(0, 0);
@@ -77,10 +78,12 @@ class Boid {
     // Leaving the code temporarily this way so that this example runs in JS
     float angle = random(TWO_PI);
     velocity = new PVector(cos(angle), sin(angle));
-
+    
+    hue = (0.2*(random(1.0)-0.5) + 0.0) % 1.0;
+    
     location = new PVector(x, y);
     r = 2.0;
-    maxspeed = 2;
+    maxspeed = 4;
     maxforce = 0.03;
   }
 
@@ -103,8 +106,8 @@ class Boid {
     PVector coh = cohesion(boids);   // Cohesion
     // Arbitrarily weight these forces
     sep.mult(1.5);
-    ali.mult(1.0);
-    coh.mult(1.0);
+    ali.mult(0.5);
+    coh.mult(0.8);
     // Add the force vectors to acceleration
     applyForce(sep);
     applyForce(ali);
@@ -144,12 +147,13 @@ class Boid {
     // Draw a triangle rotated in the direction of velocity
     float theta = velocity.heading2D() + radians(90);
     // heading2D() above is now heading() but leaving old syntax until Processing.js catches up
-    int size = 40;
+    int size = 48;
     float aspect = 1.2;
     //fill(1, 0.1, 0.6, 0.05);
     pushMatrix();
     translate(location.x, location.y);
     rotate(theta);
+    tint(hue, 0.7, 1.0);
     image(texture, 0 - size/2, 0 - size*aspect/2, size, size*aspect);
     popMatrix();
   }
